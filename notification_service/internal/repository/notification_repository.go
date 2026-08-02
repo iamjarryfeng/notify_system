@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
-	"github.com/jarryfeng/notify_system/notification_service/internal/models"
+	"github.com/iamjarryfeng/notify_system/notification_service/internal/models"
 )
 
 // NotificationRepository defines the persistence contract for notifications.

@@ -7,8 +7,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/jarryfeng/notify_system/notification_service/internal/models"
-	"github.com/jarryfeng/notify_system/notification_service/internal/service"
+	"github.com/iamjarryfeng/notify_system/notification_service/internal/models"
+	"github.com/iamjarryfeng/notify_system/notification_service/internal/service"
 )
 
 const maxListLimit = 100

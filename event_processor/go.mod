@@ -1,4 +1,4 @@
-module github.com/jarryfeng/notify_system/event_processor
+module github.com/iamjarryfeng/notify_system/event_processor
 
 go 1.25.0
 

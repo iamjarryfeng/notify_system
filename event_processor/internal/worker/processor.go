@@ -11,9 +11,9 @@ import (
 	"time"
 
 	"github.com/go-redis/redis/v8"
-	"github.com/jarryfeng/notify_system/event_processor/internal/config"
-	"github.com/jarryfeng/notify_system/event_processor/internal/models"
-	"github.com/jarryfeng/notify_system/event_processor/internal/repository"
+	"github.com/iamjarryfeng/notify_system/event_processor/internal/config"
+	"github.com/iamjarryfeng/notify_system/event_processor/internal/models"
+	"github.com/iamjarryfeng/notify_system/event_processor/internal/repository"
 )
 
 const queueKey = "events:queue"

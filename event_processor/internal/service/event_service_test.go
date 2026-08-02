@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jarryfeng/notify_system/event_processor/internal/models"
-	"github.com/jarryfeng/notify_system/event_processor/internal/repository"
+	"github.com/iamjarryfeng/notify_system/event_processor/internal/models"
+	"github.com/iamjarryfeng/notify_system/event_processor/internal/repository"
 )
 
 // mockEventRepository implements repository.EventRepository for testing.

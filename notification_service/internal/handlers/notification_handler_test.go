@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jarryfeng/notify_system/notification_service/internal/models"
-	"github.com/jarryfeng/notify_system/notification_service/internal/service"
+	"github.com/iamjarryfeng/notify_system/notification_service/internal/models"
+	"github.com/iamjarryfeng/notify_system/notification_service/internal/service"
 )
 
 // mockNotificationService implements service.NotificationService for handler tests.

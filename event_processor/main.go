@@ -14,13 +14,13 @@ import (
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 
-	"github.com/jarryfeng/notify_system/event_processor/internal/config"
-	"github.com/jarryfeng/notify_system/event_processor/internal/db"
-	"github.com/jarryfeng/notify_system/event_processor/internal/handlers"
-	"github.com/jarryfeng/notify_system/event_processor/internal/middleware"
-	"github.com/jarryfeng/notify_system/event_processor/internal/repository"
-	"github.com/jarryfeng/notify_system/event_processor/internal/service"
-	"github.com/jarryfeng/notify_system/event_processor/internal/worker"
+	"github.com/iamjarryfeng/notify_system/event_processor/internal/config"
+	"github.com/iamjarryfeng/notify_system/event_processor/internal/db"
+	"github.com/iamjarryfeng/notify_system/event_processor/internal/handlers"
+	"github.com/iamjarryfeng/notify_system/event_processor/internal/middleware"
+	"github.com/iamjarryfeng/notify_system/event_processor/internal/repository"
+	"github.com/iamjarryfeng/notify_system/event_processor/internal/service"
+	"github.com/iamjarryfeng/notify_system/event_processor/internal/worker"
 )
 
 func main() {

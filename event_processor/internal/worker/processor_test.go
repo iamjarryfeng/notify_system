@@ -11,8 +11,8 @@ import (
 
 	miniredis "github.com/alicebob/miniredis/v2"
 	"github.com/go-redis/redis/v8"
-	"github.com/jarryfeng/notify_system/event_processor/internal/config"
-	"github.com/jarryfeng/notify_system/event_processor/internal/models"
+	"github.com/iamjarryfeng/notify_system/event_processor/internal/config"
+	"github.com/iamjarryfeng/notify_system/event_processor/internal/models"
 )
 
 type stubEventRepository struct {

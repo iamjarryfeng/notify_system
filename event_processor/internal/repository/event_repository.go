@@ -10,7 +10,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
-	"github.com/jarryfeng/notify_system/event_processor/internal/models"
+	"github.com/iamjarryfeng/notify_system/event_processor/internal/models"
 )
 
 var ErrDuplicateEvent = errors.New("event already exists")

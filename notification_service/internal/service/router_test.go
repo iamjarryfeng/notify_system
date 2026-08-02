@@ -3,7 +3,7 @@ package service
 import (
 	"testing"
 
-	"github.com/jarryfeng/notify_system/notification_service/internal/channels"
+	"github.com/iamjarryfeng/notify_system/notification_service/internal/channels"
 )
 
 func TestRouterResolve(t *testing.T) {

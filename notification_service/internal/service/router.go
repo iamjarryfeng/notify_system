@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/jarryfeng/notify_system/notification_service/internal/channels"
+	"github.com/iamjarryfeng/notify_system/notification_service/internal/channels"
 )
 
 // Route describes a single notification dispatch target for a given event type.

@@ -7,8 +7,8 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jarryfeng/notify_system/event_processor/internal/models"
-	"github.com/jarryfeng/notify_system/event_processor/internal/service"
+	"github.com/iamjarryfeng/notify_system/event_processor/internal/models"
+	"github.com/iamjarryfeng/notify_system/event_processor/internal/service"
 )
 
 const maxListLimit = 100

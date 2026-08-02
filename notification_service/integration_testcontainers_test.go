@@ -16,8 +16,8 @@ import (
 	_ "github.com/lib/pq"
 	tcpostgres "github.com/testcontainers/testcontainers-go/modules/postgres"
 
-	internaldb "github.com/jarryfeng/notify_system/notification_service/internal/db"
-	"github.com/jarryfeng/notify_system/notification_service/internal/models"
+	internaldb "github.com/iamjarryfeng/notify_system/notification_service/internal/db"
+	"github.com/iamjarryfeng/notify_system/notification_service/internal/models"
 )
 
 func TestNotificationHTTPAndDatabaseIntegrationWithTestcontainers(t *testing.T) {

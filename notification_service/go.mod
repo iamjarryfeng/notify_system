@@ -1,4 +1,4 @@
-module github.com/jarryfeng/notify_system/notification_service
+module github.com/iamjarryfeng/notify_system/notification_service
 
 go 1.25.0
 

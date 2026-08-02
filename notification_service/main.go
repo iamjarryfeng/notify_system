@@ -13,13 +13,13 @@ import (
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 
-	"github.com/jarryfeng/notify_system/notification_service/internal/channels"
-	"github.com/jarryfeng/notify_system/notification_service/internal/config"
-	"github.com/jarryfeng/notify_system/notification_service/internal/db"
-	"github.com/jarryfeng/notify_system/notification_service/internal/handlers"
-	"github.com/jarryfeng/notify_system/notification_service/internal/middleware"
-	"github.com/jarryfeng/notify_system/notification_service/internal/repository"
-	"github.com/jarryfeng/notify_system/notification_service/internal/service"
+	"github.com/iamjarryfeng/notify_system/notification_service/internal/channels"
+	"github.com/iamjarryfeng/notify_system/notification_service/internal/config"
+	"github.com/iamjarryfeng/notify_system/notification_service/internal/db"
+	"github.com/iamjarryfeng/notify_system/notification_service/internal/handlers"
+	"github.com/iamjarryfeng/notify_system/notification_service/internal/middleware"
+	"github.com/iamjarryfeng/notify_system/notification_service/internal/repository"
+	"github.com/iamjarryfeng/notify_system/notification_service/internal/service"
 )
 
 func main() {

@@ -7,10 +7,10 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/jarryfeng/notify_system/notification_service/internal/channels"
-	"github.com/jarryfeng/notify_system/notification_service/internal/middleware"
-	"github.com/jarryfeng/notify_system/notification_service/internal/models"
-	"github.com/jarryfeng/notify_system/notification_service/internal/repository"
+	"github.com/iamjarryfeng/notify_system/notification_service/internal/channels"
+	"github.com/iamjarryfeng/notify_system/notification_service/internal/middleware"
+	"github.com/iamjarryfeng/notify_system/notification_service/internal/models"
+	"github.com/iamjarryfeng/notify_system/notification_service/internal/repository"
 )
 
 // Sentinel errors for notification business logic.

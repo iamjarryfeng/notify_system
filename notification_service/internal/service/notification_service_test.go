@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jarryfeng/notify_system/notification_service/internal/channels"
-	"github.com/jarryfeng/notify_system/notification_service/internal/models"
+	"github.com/iamjarryfeng/notify_system/notification_service/internal/channels"
+	"github.com/iamjarryfeng/notify_system/notification_service/internal/models"
 )
 
 // mockNotificationRepository implements repository.NotificationRepository for testing.
