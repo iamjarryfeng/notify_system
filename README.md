@@ -5,6 +5,15 @@ An event-driven notification platform built with two Go microservices.
 - `event_processor` ingests events over HTTP, persists them in PostgreSQL, queues them in Redis, and processes them asynchronously.
 - `notification_service` receives processed events, resolves notification channels, dispatches email/webhook messages, and records outcomes in PostgreSQL.
 
+## Highlights
+
+- **Reliable async processing**: HTTP ingestion is decoupled from delivery with PostgreSQL persistence, a Redis queue, and a background worker, so the API stays fast and failures do not silently lose events.
+- **End-to-end idempotency**: duplicate event submissions return `409 Conflict`, and repeated notification dispatch is deduplicated by `(event_id, channel)` to prevent duplicate emails or webhooks.
+- **Failure recovery built in**: stale pending events are periodically re-enqueued, retries use exponential backoff with jitter, and partial channel failures remain traceable through per-notification status updates.
+- **Observable by default**: request IDs propagate across HTTP, PostgreSQL, Redis, and downstream calls; structured JSON logs plus separate `/health` and `/ready` probes make the system easy to operate.
+- **Clean Go architecture**: two independent microservices use handler/service/repository separation, declarative channel routing, and swappable dispatcher abstractions for real provider integrations.
+- **Tested end to end**: table-driven unit tests, real PostgreSQL integration tests, testcontainers coverage, and a one-command Docker Compose stack validate the full event path.
+
 ## Repository Layout
 
 ```
