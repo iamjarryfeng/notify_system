@@ -1,13 +1,13 @@
 # notify_system
 
-An event-driven notification platform in Go that turns HTTP events into reliable email and webhook notifications. Two small microservices, PostgreSQL, and Redis handle ingestion, asynchronous delivery, retries, idempotency, and end-to-end traceability.
+基于 Go 的事件驱动通知平台，将 HTTP 事件转化为可靠的邮件和 Webhook 通知。两个独立微服务结合 PostgreSQL 和 Redis，覆盖事件接入、异步投递、重试、幂等和端到端链路追踪。
 
 <p align="center">
   <a href="https://github.com/iamjarryfeng/notify_system">
-    <img alt="GitHub stars" src="https://img.shields.io/github/stars/iamjarryfeng/notify_system">
+    <img alt="GitHub Stars" src="https://img.shields.io/github/stars/iamjarryfeng/notify_system">
   </a>
   <a href="https://github.com/iamjarryfeng/notify_system/fork">
-    <img alt="GitHub forks" src="https://img.shields.io/github/forks/iamjarryfeng/notify_system">
+    <img alt="GitHub Forks" src="https://img.shields.io/github/forks/iamjarryfeng/notify_system">
   </a>
   <img alt="Go" src="https://img.shields.io/badge/Go-1.25-00ADD8?logo=go&logoColor=white">
   <img alt="PostgreSQL" src="https://img.shields.io/badge/PostgreSQL-16-336791?logo=postgresql&logoColor=white">
@@ -15,28 +15,28 @@ An event-driven notification platform in Go that turns HTTP events into reliable
   <img alt="Docker Compose" src="https://img.shields.io/badge/Docker_Compose-ok-2496ED?logo=docker&logoColor=white">
 </p>
 
-> This is a production-oriented reference implementation. The email and webhook dispatchers are pluggable stubs, so wire them to real providers before production traffic.
+> 这是一个面向生产场景设计的参考实现。默认的 email 和 webhook dispatcher 是可替换实现，接入真实流量前请替换为你的真实供应商。
 
-## Why notify_system?
+## 为什么选择 notify_system？
 
-- **Fast ingestion without blocking delivery.** `POST /events` persists the event, enqueues it, and returns `202 Accepted`; a background worker handles delivery.
-- **Durable by default.** Events are stored in PostgreSQL before they are queued. A reconciler periodically re-enqueues stale `pending` events to recover from queue gaps.
-- **No duplicate side effects.** Optional client-supplied event UUIDs produce `409 Conflict` on duplicate submissions, and notifications are deduplicated by `(event_id, channel)`.
-- **Safe retries.** Worker retries distinguish permanent 4xx responses from transient 5xx and network failures, using exponential backoff with jitter.
-- **Easy to trace.** Request IDs persist across HTTP, PostgreSQL, Redis, the worker, and downstream calls.
-- **Operable.** Structured JSON logs, `/health`, `/ready`, graceful shutdown, and a one-command Docker Compose stack are included.
-- **Clean and testable.** Handler/service/repository separation, declarative routing, dispatcher interfaces, and integration tests make the codebase easy to extend.
+- **快速接入，不阻塞投递。** `POST /events` 完成事件持久化和入队后立即返回 `202 Accepted`，实际投递由后台 worker 处理。
+- **默认具备持久化。** 事件先写入 PostgreSQL，再进入 Redis 队列；reconciler 会周期性重新入队过期的 `pending` 事件，弥补数据库写入和队列写入之间的间隙。
+- **避免重复副作用。** 客户端可指定事件 UUID，重复提交返回 `409 Conflict`；通知按 `(event_id, channel)` 去重，避免重复邮件或 Webhook。
+- **安全的重试机制。** worker 对永久性 4xx 响应不做重试，对 5xx 和网络错误使用带抖动的指数退避重试。
+- **全链路可追踪。** Request ID 会贯穿 HTTP、PostgreSQL、Redis、worker 和下游调用。
+- **开箱即运维。** 结构化 JSON 日志、`/health`、`/ready`、优雅退出和一键 Docker Compose。
+- **架构清晰且可测试。** handler/service/repository 分层、声明式路由、dispatcher 抽象和集成测试让项目容易扩展。
 
-## Services
+## 服务组成
 
-- `event_processor` ingests events over HTTP, persists them in PostgreSQL, queues them in Redis, and processes them asynchronously.
-- `notification_service` receives processed events, resolves notification channels, dispatches email/webhook messages, and records outcomes in PostgreSQL.
+- `event_processor` 通过 HTTP 接收事件，持久化到 PostgreSQL，写入 Redis 队列，并异步处理事件。
+- `notification_service` 接收处理完成的事件，解析通知渠道，投递 email/webhook 消息，并把结果写入 PostgreSQL。
 
-## Architecture
+## 系统架构
 
 ```mermaid
 flowchart LR
-    Client["Client"] -->|"POST /events"| Ingest["event_processor"]
+    Client["客户端"] -->|"POST /events"| Ingest["event_processor"]
     Ingest -->|"INSERT pending"| DB[("PostgreSQL")]
     Ingest -->|"LPUSH event_id"| Queue[("Redis queue")]
     Worker["Worker"] -->|"BLPOP event_id"| Queue
@@ -49,16 +49,16 @@ flowchart LR
     Reconciler["Reconciler"] -.->|"re-enqueue stale pending"| Queue
 ```
 
-### How It Works
+### 工作流程
 
-1. A client sends an event to `event_processor`. The service validates it, persists it as `pending`, enqueues the event ID in Redis, and returns `202 Accepted`.
-2. The background worker pops the event ID, reloads the full event from PostgreSQL, and calls `notification_service`.
-3. `notification_service` resolves routes for the event type, persists pending notifications, dispatches through the selected channels, and records `sent` or `failed`.
-4. The reconciler re-enqueues events that remain `pending` too long, protecting against the PostgreSQL/Redis write gap.
+1. 客户端向 `event_processor` 提交事件。服务校验后把事件持久化为 `pending`，把事件 ID 写入 Redis 队列，并返回 `202 Accepted`。
+2. 后台 worker 从 Redis 取出事件 ID，从 PostgreSQL 加载完整事件，再调用 `notification_service`。
+3. `notification_service` 根据事件类型解析路由，先持久化 `pending` 通知，再调用对应渠道投递，最后把状态更新为 `sent` 或 `failed`。
+4. reconciler 会重新入队长期处于 `pending` 的事件，降低 PostgreSQL/Redis 写入间隙带来的丢失风险。
 
-## Quick Start
+## 快速开始
 
-Prerequisites: Docker and Docker Compose.
+前置条件：Docker 和 Docker Compose。
 
 ```bash
 git clone https://github.com/iamjarryfeng/notify_system.git
@@ -66,14 +66,14 @@ cd notify_system
 docker compose up --build
 ```
 
-Verify both services are ready:
+确认两个服务已经就绪：
 
 ```bash
 curl -s http://localhost:8080/ready
 curl -s http://localhost:8081/ready
 ```
 
-Create an event:
+创建一个事件：
 
 ```bash
 curl -s -X POST http://localhost:8080/events \
@@ -87,86 +87,86 @@ curl -s -X POST http://localhost:8080/events \
   }'
 ```
 
-Watch it move from the event queue into a notification:
+查看事件进入队列后生成的通知：
 
 ```bash
 curl -s http://localhost:8080/events/11111111-1111-4111-8111-111111111111
 curl -s "http://localhost:8081/notifications?event_id=11111111-1111-4111-8111-111111111111"
 ```
 
-If you omit `id`, PostgreSQL generates a UUID for the event. Providing the same UUID again returns `409 Conflict`.
+如果不传 `id`，PostgreSQL 会自动生成 UUID。如果再次提交同一个 UUID，接口会返回 `409 Conflict`。
 
-## Run Without Docker
+## 不使用 Docker 运行
 
-Start PostgreSQL and Redis, then run the services in separate terminals:
+先启动 PostgreSQL 和 Redis，然后在两个终端分别启动服务：
 
 ```bash
 docker compose up postgres redis -d
 
-# Terminal 1: event_processor
+# 终端 1：event_processor
 cd event_processor
 DATABASE_URL="postgres://notify:notify@localhost:5432/notify?sslmode=disable" \
 REDIS_URL="redis://localhost:6379/0" \
 NOTIFICATION_SERVICE_URL="http://localhost:8081" \
 go run ./main.go
 
-# Terminal 2: notification_service
+# 终端 2：notification_service
 cd notification_service
 DATABASE_URL="postgres://notify:notify@localhost:5432/notify?sslmode=disable" \
 go run ./main.go
 ```
 
-## Default Routing
+## 默认路由
 
-| Event type | Channels | Required payload keys |
+| 事件类型 | 通知渠道 | 必须的 payload 字段 |
 |------------|----------|------------------------|
 | `user.registered` | email | `email` |
-| `order.completed` | email + webhook | `email`, `webhook_url` |
+| `order.completed` | email + webhook | `email`、`webhook_url` |
 | `payment.failed` | email | `email` |
-| any other event | webhook | `webhook_url` |
+| 其他事件 | webhook | `webhook_url` |
 
-The default dispatchers log a successful send. To integrate real providers, implement `channels.Dispatcher` and register it in `notification_service/main.go`; the retry wrapper is already applied around each dispatcher.
+默认 dispatcher 只会记录发送成功日志。要接入真实供应商，请实现 `channels.Dispatcher` 并在 `notification_service/main.go` 中注册；重试包装器已经自动包裹在每个 dispatcher 外层。
 
 ## HTTP API
 
 ### event_processor
 
-| Method | Path | Description |
+| 方法 | 路径 | 说明 |
 |--------|------|-------------|
-| `POST` | `/events` | Ingest and enqueue an event; returns `202 Accepted` |
-| `GET` | `/events/:id` | Fetch an event by ID |
-| `GET` | `/events` | List events with `status`, `limit`, and `offset` |
-| `GET` | `/health` | Liveness probe |
-| `GET` | `/ready` | Readiness probe for PostgreSQL and Redis |
+| `POST` | `/events` | 接收并入队事件，返回 `202 Accepted` |
+| `GET` | `/events/:id` | 按 ID 查询事件 |
+| `GET` | `/events` | 按 `status`、`limit`、`offset` 查询事件列表 |
+| `GET` | `/health` | 存活探针 |
+| `GET` | `/ready` | PostgreSQL 和 Redis 就绪探针 |
 
 ### notification_service
 
-| Method | Path | Description |
+| 方法 | 路径 | 说明 |
 |--------|------|-------------|
-| `POST` | `/notifications` | Send or deduplicate a notification |
-| `GET` | `/notifications/:id` | Fetch a notification by ID |
-| `GET` | `/notifications` | List notifications with `event_id`, `status`, `limit`, and `offset` |
-| `GET` | `/health` | Liveness probe |
-| `GET` | `/ready` | Readiness probe for PostgreSQL |
+| `POST` | `/notifications` | 发送或去重通知 |
+| `GET` | `/notifications/:id` | 按 ID 查询通知 |
+| `GET` | `/notifications` | 按 `event_id`、`status`、`limit`、`offset` 查询通知列表 |
+| `GET` | `/health` | 存活探针 |
+| `GET` | `/ready` | PostgreSQL 就绪探针 |
 
-List endpoints cap `limit` at `100` to keep queries bounded.
+列表接口会把 `limit` 上限限制为 `100`，避免查询无界增长。
 
-## Configuration
+## 配置
 
-Both services read configuration from environment variables.
+两个服务都通过环境变量读取配置。
 
-| Variable | Service | Default | Purpose |
+| 变量 | 服务 | 默认值 | 说明 |
 |----------|---------|---------|---------|
-| `DATABASE_URL` | both | required | PostgreSQL connection string |
-| `REDIS_URL` | event_processor | required | Redis connection string |
-| `NOTIFICATION_SERVICE_URL` | event_processor | required | downstream notification service URL |
-| `PORT` | both | `8080` / `8081` | HTTP listen port |
-| `MAX_RETRIES` | event_processor | `3` | worker attempts for the notification service |
-| `RETRY_BASE_DELAY_MS` | event_processor | `1000` | base backoff delay for worker retries |
-| `DISPATCH_MAX_RETRIES` | notification_service | `3` | attempts per notification dispatcher |
-| `DISPATCH_RETRY_BASE_DELAY_MS` | notification_service | `1000` | base backoff delay for dispatcher retries |
+| `DATABASE_URL` | 两个服务 | 必填 | PostgreSQL 连接串 |
+| `REDIS_URL` | event_processor | 必填 | Redis 连接串 |
+| `NOTIFICATION_SERVICE_URL` | event_processor | 必填 | 下游通知服务地址 |
+| `PORT` | 两个服务 | `8080` / `8081` | HTTP 监听端口 |
+| `MAX_RETRIES` | event_processor | `3` | worker 调用通知服务的最大尝试次数 |
+| `RETRY_BASE_DELAY_MS` | event_processor | `1000` | worker 重试的基础退避时间 |
+| `DISPATCH_MAX_RETRIES` | notification_service | `3` | 每个通知 dispatcher 的最大尝试次数 |
+| `DISPATCH_RETRY_BASE_DELAY_MS` | notification_service | `1000` | dispatcher 重试的基础退避时间 |
 
-## Testing
+## 测试
 
 ```bash
 make build
@@ -176,40 +176,40 @@ make test-ci
 make compose-up
 ```
 
-The test suite includes table-driven unit tests, real PostgreSQL integration tests, embedded PostgreSQL, miniredis, and testcontainers coverage. Integration tests skip when their dependencies are unavailable; set `RUN_INTEGRATION=1` or use `make test-ci` to require them.
+测试覆盖表驱动单元测试、真实 PostgreSQL 集成测试、embedded PostgreSQL、miniredis 和 testcontainers。集成测试在依赖不可用时自动跳过；设置 `RUN_INTEGRATION=1` 或使用 `make test-ci` 可强制要求依赖。
 
-## Repository Layout
+## 目录结构
 
 ```
 .
-├── docker-compose.yml          # Local dev stack: PostgreSQL, Redis, and both services
-├── event_processor/            # Ingest, queue, process, and forward events
-├── notification_service/       # Resolve routes and dispatch notifications
-├── Makefile                    # Build, test, and compose helpers
-├── SOLUTION.md                 # Design decisions, tradeoffs, and verification notes
-└── CLAUDE.md                   # Developer-oriented working notes
+├── docker-compose.yml          # 本地开发环境：PostgreSQL、Redis 和两个服务
+├── event_processor/            # 事件接入、队列、处理和转发
+├── notification_service/       # 渠道路由和通知投递
+├── Makefile                    # 构建、测试和 compose 辅助命令
+├── SOLUTION.md                 # 设计决策、取舍和验证说明
+└── CLAUDE.md                   # 面向开发者的协作说明
 ```
 
 ## Roadmap
 
-- Real SMTP and HTTP webhook providers behind the existing `Dispatcher` interface
-- Dead-letter queue and replay for permanently failed events
-- Prometheus metrics and OpenTelemetry tracing
-- Transactional outbox for stronger persistence guarantees
-- API authentication and service-to-service auth
-- Pagination metadata such as `total` and `next_offset`
+- 在现有 `Dispatcher` 接口后接入真实 SMTP 和 HTTP Webhook 服务
+- 增加死信队列和失败事件重放
+- 增加 Prometheus 指标和 OpenTelemetry tracing
+- 引入 transactional outbox 以获得更强的持久化一致性
+- 增加 API 鉴权和微服务间认证
+- 列表接口补充 `total`、`next_offset` 等分页元数据
 
-Contributions are welcome for any of these items.
+欢迎针对以上方向提交 PR。
 
-## Contributing
+## 贡献指南
 
-1. Fork the repository and create a feature branch.
-2. Keep changes small and focused.
-3. Add or update tests for behavior changes.
-4. Run `make vet` and `make test`.
-5. Open a pull request with a clear description.
+1. Fork 仓库并创建功能分支。
+2. 保持改动小而聚焦。
+3. 为行为变更补充或更新测试。
+4. 运行 `make vet` 和 `make test`。
+5. 提交清晰的 PR 描述。
 
-## Further Reading
+## 更多文档
 
-- `SOLUTION.md` documents design decisions, tradeoffs, and validation notes.
-- `CLAUDE.md` contains developer-oriented guidance for working in this repository.
+- `SOLUTION.md` 记录了设计决策、取舍和验证说明。
+- `CLAUDE.md` 包含面向开发者的协作说明。
